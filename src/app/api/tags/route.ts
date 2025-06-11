@@ -2,10 +2,26 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export async function GET(req: Request) {
-  const OLLAMA_URL = process.env.OLLAMA_URL;
-  console.log('OLLAMA_URL:', process.env.OLLAMA_URL);
-  const res = await fetch(
-    OLLAMA_URL + "/api/tags"
-  );
-  return new Response(res.body, res);
+  const CUSTOM_API_URL = process.env.CUSTOM_API_URL;
+  console.log('CUSTOM_API_URL:', CUSTOM_API_URL);
+
+  if (!CUSTOM_API_URL) {
+    return new Response('CUSTOM_API_URL is not defined', { status: 500 });
+  }
+
+  try {
+    const res = await fetch(`${CUSTOM_API_URL}/api/tags`);
+
+    if (!res.ok) {
+      return new Response('Failed to fetch data from custom API', { status: res.status });
+    }
+
+    return new Response(res.body, {
+      status: res.status,
+      headers: res.headers,
+    });
+  } catch (error) {
+    console.error('Error fetching data from custom API:', error);
+    return new Response('Internal Server Error', { status: 500 });
+  }
 }

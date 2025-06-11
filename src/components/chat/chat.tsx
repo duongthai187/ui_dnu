@@ -61,6 +61,32 @@ export default function Chat({ initialMessages, id, isMobile }: ChatProps) {
   const getMessagesById = useChatStore((state) => state.getMessagesById);
   const router = useRouter();
 
+  async function sendMessageToAPI(input: string, base64Images: string[] | null) {
+    const CUSTOM_API_URL = process.env.CUSTOM_API_URL || "https://your-backend-api.com";
+
+    try {
+      const response = await fetch(`${CUSTOM_API_URL}/api/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: input,
+          images: base64Images || [],
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("API error");
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Error in sendMessageToAPI:", error);
+      throw error;
+    }
+  }
+
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     window.history.replaceState({}, "", `/c/${id}`);
@@ -73,26 +99,15 @@ export default function Chat({ initialMessages, id, isMobile }: ChatProps) {
 
     setLoadingSubmit(true);
 
-    // Gửi message tới API backend sample
     try {
-      const response = await fetch("https://your-backend-api.com/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: input,
-          images: base64Images || [],
-        }),
-      });
-      if (!response.ok) throw new Error("API error");
-      const data = await response.json();
-      // Giả sử API trả về { reply: string }
+      const data = await sendMessageToAPI(input, base64Images);
+
       const aiMessage: Message = {
         id: generateId(),
         role: "assistant",
         content: data.reply,
       };
+
       saveMessages(id, [...messages, userMessage, aiMessage]);
       setMessages([...messages, userMessage, aiMessage]);
     } catch (error) {
@@ -133,7 +148,7 @@ export default function Chat({ initialMessages, id, isMobile }: ChatProps) {
             alt="AI"
             width={80}
             height={80}
-            className="h-24 w-24 xl:h-28 xl:w-28 object-contain dark:invert"
+            className="h-24 w-24 xl:h-28 xl:w-28 object-contain"
           />
           <p className="text-center text-xl xl:text-2xl font-semibold text-muted-foreground">
             Hôm nay bạn cần mình trợ giúp điều gì ?

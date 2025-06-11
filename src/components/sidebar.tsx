@@ -72,7 +72,7 @@ export function Sidebar({
                 alt="AI"
                 width={32}
                 height={32}
-                className="dark:invert hidden 2xl:block"
+                className="hidden 2xl:block"
               />
             )}
             Cửa sổ mới
