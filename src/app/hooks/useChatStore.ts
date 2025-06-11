@@ -39,7 +39,7 @@ const useChatStore = create<State & Actions>()(
       chats: {},
       currentChatId: null,
       selectedModel: null,
-      userName: "Anonymous",
+      userName: "Khách",
       isDownloading: false,
       downloadProgress: 0,
       downloadingModel: null, 

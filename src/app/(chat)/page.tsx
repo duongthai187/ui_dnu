@@ -38,10 +38,9 @@ export default function Home() {
         />
         <DialogContent className="flex flex-col space-y-4">
           <DialogHeader className="space-y-2">
-            <DialogTitle>Welcome to Ollama!</DialogTitle>
+            <DialogTitle>Trường Đại học Đại Nam xin chào bạn</DialogTitle>
             <DialogDescription>
-              Enter your name to get started. This is just to personalize your
-              experience.
+              Cho mình biết nên gọi bạn là gì nhé. Bạn có thể thay đổi tên này bất cứ lúc nào.
             </DialogDescription>
             <UsernameForm setOpen={setOpen} />
           </DialogHeader>

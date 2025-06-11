@@ -51,12 +51,12 @@ export function ChatLayout({
   return (
     <ResizablePanelGroup
       direction="horizontal"
+      className="flex-1 min-h-0 h-full items-stretch overflow-hidden"
       onLayout={(sizes: number[]) => {
         document.cookie = `react-resizable-panels:layout=${JSON.stringify(
           sizes
         )}`;
       }}
-      className="h-screen items-stretch"
     >
       <ResizablePanel
         defaultSize={defaultLayout[0]}
@@ -91,7 +91,7 @@ export function ChatLayout({
       </ResizablePanel>
       <ResizableHandle className={cn("hidden md:flex")} withHandle />
       <ResizablePanel
-        className="h-full w-full flex justify-center"
+        className="h-full w-full flex justify-center min-h-0 overflow-hidden"
         defaultSize={defaultLayout[1]}
       >
         <Chat id={id} initialMessages={initialMessages} isMobile={isMobile} />

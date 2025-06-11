@@ -61,14 +61,9 @@ export default function Chat({ initialMessages, id, isMobile }: ChatProps) {
   const getMessagesById = useChatStore((state) => state.getMessagesById);
   const router = useRouter();
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     window.history.replaceState({}, "", `/c/${id}`);
-
-    if (!selectedModel) {
-      toast.error("Please select a model");
-      return;
-    }
 
     const userMessage: Message = {
       id: generateId(),
@@ -78,28 +73,35 @@ export default function Chat({ initialMessages, id, isMobile }: ChatProps) {
 
     setLoadingSubmit(true);
 
-    const attachments: Attachment[] = base64Images
-      ? base64Images.map((image) => ({
-          contentType: "image/base64",
-          url: image,
-        }))
-      : [];
-
-    const requestOptions: ChatRequestOptions = {
-      body: {
-        selectedModel: selectedModel,
-      },
-      ...(base64Images && {
-        data: {
-          images: base64Images,
+    // Gửi message tới API backend sample
+    try {
+      const response = await fetch("https://your-backend-api.com/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-        experimental_attachments: attachments,
-      }),
-    };
-
-    handleSubmit(e, requestOptions);
-    saveMessages(id, [...messages, userMessage]);
-    setBase64Images(null);
+        body: JSON.stringify({
+          message: input,
+          images: base64Images || [],
+        }),
+      });
+      if (!response.ok) throw new Error("API error");
+      const data = await response.json();
+      // Giả sử API trả về { reply: string }
+      const aiMessage: Message = {
+        id: generateId(),
+        role: "assistant",
+        content: data.reply,
+      };
+      saveMessages(id, [...messages, userMessage, aiMessage]);
+      setMessages([...messages, userMessage, aiMessage]);
+    } catch (error) {
+      toast.error("API error: " + (error as Error).message);
+    } finally {
+      setLoadingSubmit(false);
+      setBase64Images(null);
+      setInput("");
+    }
   };
 
   const removeLatestMessage = () => {
@@ -127,14 +129,14 @@ export default function Chat({ initialMessages, id, isMobile }: ChatProps) {
       {messages.length === 0 ? (
         <div className="flex flex-col h-full w-full items-center gap-4 justify-center">
           <Image
-            src="/ollama.png"
+            src="/Logo_DAI_NAM.png"
             alt="AI"
-            width={40}
-            height={40}
-            className="h-16 w-14 object-contain dark:invert"
+            width={80}
+            height={80}
+            className="h-24 w-24 xl:h-28 xl:w-28 object-contain dark:invert"
           />
-          <p className="text-center text-base text-muted-foreground">
-            How can I help you today?
+          <p className="text-center text-xl xl:text-2xl font-semibold text-muted-foreground">
+            Hôm nay bạn cần mình trợ giúp điều gì ?
           </p>
           <ChatBottombar
             input={input}
@@ -154,11 +156,7 @@ export default function Chat({ initialMessages, id, isMobile }: ChatProps) {
             reload={async () => {
               removeLatestMessage();
 
-              const requestOptions: ChatRequestOptions = {
-                body: {
-                  selectedModel: selectedModel,
-                },
-              };
+              const requestOptions: ChatRequestOptions = {};
 
               setLoadingSubmit(true);
               return reload(requestOptions);

@@ -29,9 +29,12 @@ import EditUsernameForm from "./edit-username-form";
 import PullModel from "./pull-model";
 import useChatStore from "@/app/hooks/useChatStore";
 
-export default function UserSettings() {
-  const [open, setOpen] = useState(false);
+interface UserSettingsProps {
+  showPullModel?: boolean;
+}
 
+export default function UserSettings({ showPullModel = true }: UserSettingsProps) {
+  const [open, setOpen] = useState(false);
   const userName = useChatStore((state) => state.userName);
 
   return (
@@ -39,46 +42,50 @@ export default function UserSettings() {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="flex justify-start gap-3 w-full h-14 text-base font-normal items-center "
+          className="flex justify-start gap-4 w-full h-20 xl:h-24 text-lg xl:text-xl font-semibold items-center px-4 py-3"
         >
-          <Avatar className="flex justify-start items-center overflow-hidden">
+          <Avatar className="flex justify-start items-center overflow-hidden h-14 w-14 xl:h-16 xl:w-16">
             <AvatarImage
-              src=""
-              alt="AI"
-              width={4}
-              height={4}
-              className="object-contain"
+              src="/user.jpg"
+              alt="User"
+              width={64}
+              height={64}
+              className="object-cover h-14 w-14 xl:h-16 xl:w-16 border-2 border-primary"
             />
-            <AvatarFallback>
-              {userName.substring(0, 2).toUpperCase()}
+            <AvatarFallback className="text-xl xl:text-2xl">
+              {(userName && userName !== "Anonymous" ? userName : "Khách")
+                .substring(0, 2)
+                .toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <div className="text-xs truncate">
-            <p>{userName}</p>
+          <div className="flex flex-col items-start justify-center min-w-0">
+            <p className="text-base xl:text-lg font-bold truncate max-w-[120px] xl:max-w-[160px]">
+              {userName && userName !== "Anonymous" ? userName : "Khách"}
+            </p>
+            <span className="text-xs xl:text-sm text-muted-foreground font-normal">
+              Tài khoản
+            </span>
           </div>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-48 p-2">
-        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-          <PullModel />
-        </DropdownMenuItem>
+      <DropdownMenuContent className="w-56 p-3">
+        {/* Không còn PullModel */}
         <Dialog>
           <DialogTrigger className="w-full">
             <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
               <div className="flex w-full gap-2 p-1 items-center cursor-pointer">
-                <GearIcon className="w-4 h-4" />
-                Settings
+                <GearIcon className="w-5 h-5" />
+                Cài đặt
               </div>
             </DropdownMenuItem>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader className="space-y-4">
-              <DialogTitle>Settings</DialogTitle>
+              <DialogTitle>Cài đặt</DialogTitle>
               <EditUsernameForm setOpen={setOpen} />
             </DialogHeader>
           </DialogContent>
         </Dialog>
-        <Dialog></Dialog>
       </DropdownMenuContent>
     </DropdownMenu>
   );
