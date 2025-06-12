@@ -3,13 +3,14 @@ import { initializeApp } from 'firebase/app';
 import { getAnalytics } from 'firebase/analytics';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDVxxWqaXYQm_Cf3oevtUVb_XRlII4utjQ",
-  authDomain: "fir-fta.firebaseapp.com",
-  projectId: "fir-fta",
-  storageBucket: "fir-fta.firebasestorage.app",
-  messagingSenderId: "738594340757",
-  appId: "1:738594340757:web:52051c1a3909eb16cd409c",
-  measurementId: "G-ZV91VRCZL2"
+  apiKey: process.env.apiKey,
+  authDomain: process.env.authDomain,
+  projectId: process.env.projectId,
+  storageBucket: process.env.storageBucket,
+  messagingSenderId: process.env.messagingSenderId,
+  appId: process.env.appId,
+  measurementId: process.env.measurementId,
+  databaseURL: process.env.databaseURL,
 };
 
 const app = initializeApp(firebaseConfig);
