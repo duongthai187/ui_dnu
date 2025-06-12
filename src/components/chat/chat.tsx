@@ -13,6 +13,9 @@ import { v4 as uuidv4 } from "uuid";
 import useChatStore from "@/app/hooks/useChatStore";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Auth from '../../Auth';
+import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
+import firebaseApp from '../../firebase';
 
 export interface ChatProps {
   id: string;
@@ -21,6 +24,19 @@ export interface ChatProps {
 }
 
 export default function Chat({ initialMessages, id, isMobile }: ChatProps) {
+  const [user, setUser] = React.useState<User | null>(null);
+  React.useEffect(() => {
+    const auth = getAuth(firebaseApp);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  if (!user) {
+    return <Auth />;
+  }
+
   const {
     messages,
     input,
