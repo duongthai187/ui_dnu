@@ -22,6 +22,7 @@ interface Actions {
   saveMessages: (chatId: string, messages: Message[]) => void;
   handleDelete: (chatId: string, messageId?: string) => void;
   setUserName: (userName: string) => void;
+  clearAllChats: () => void; // Thêm phương thức clearAllChats
 }
 
 const useChatStore = create<State & Actions>()(
@@ -91,6 +92,10 @@ const useChatStore = create<State & Actions>()(
             chats: remainingChats,
           };
         });
+      },
+
+      clearAllChats: () => {
+        set(() => ({ chats: {}, currentChatId: null })); // Xóa toàn bộ lịch sử chat và đặt currentChatId về null
       },
     }),
     

@@ -48,6 +48,7 @@ export function Sidebar({
 
   const chats = useChatStore((state) => state.chats);
   const handleDelete = useChatStore((state) => state.handleDelete);
+  const clearAllChats = useChatStore((state) => state.clearAllChats);
 
   return (
     <div
@@ -80,7 +81,7 @@ export function Sidebar({
           <SquarePen size={22} className="shrink-0 w-5 h-5" />
         </Button>
 
-        <div className="flex flex-col pt-10 gap-3">
+        <div className="flex flex-col gap-3">
           <p className="pl-4 text-sm xl:text-base text-muted-foreground font-semibold">Lịch sử trò chuyện</p>
           <Suspense fallback>
             {chats &&
@@ -166,6 +167,15 @@ export function Sidebar({
 
       <div className="justify-end px-2 py-2 w-full border-t flex flex-col gap-2 text-base xl:text-lg">
         <UserSettings showPullModel={false} />
+        <Button
+          variant="destructive"
+          className="w-full"
+          onClick={() => {
+            clearAllChats();
+          }}
+        >
+          Xóa tất cả trò chuyện
+        </Button>
       </div>
     </div>
   );

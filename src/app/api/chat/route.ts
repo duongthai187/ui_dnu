@@ -41,8 +41,7 @@
 export const dynamic = "force-dynamic"; // không cache, keep streaming
 
 export async function POST(req: Request) {
-  console.log("Received request for chat stream");
-  const { input } = await req.json();
+  const { input, user_name } = await req.json();
   const apiKey = process.env.API_DIFY_KEY!;
   const res = await fetch(`${process.env.BASE_URL}/chat-messages`, {
     method: "POST",
@@ -52,7 +51,7 @@ export async function POST(req: Request) {
     },
     body: JSON.stringify({
       query: input,
-      inputs: { user_name: "Khách" },
+      inputs: { user_name: user_name ? user_name : "Khách" },
       response_mode: "streaming",
       user: "anonymous",
       conversation_id: "",

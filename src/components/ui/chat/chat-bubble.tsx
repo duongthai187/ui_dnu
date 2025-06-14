@@ -7,7 +7,7 @@ import { Button, ButtonProps } from "../button";
 
 // ChatBubble
 const chatBubbleVariant = cva(
-  "flex gap-2 max-w-[80%] items-end relative group",
+  "flex gap-2 max-w-[80%] items-end relative group text-xl mb-10", // Thêm margin-bottom để tạo khoảng cách phía dưới
   {
     variants: {
       variant: {
@@ -71,7 +71,8 @@ const ChatBubbleAvatar: React.FC<ChatBubbleAvatarProps> = ({
 }) => (
   <Avatar>
     <AvatarImage
-      src={src}
+      // src={src}
+      src= {src || "/user.jpg"}
       alt="Avatar"
       className={className}
       width={width}

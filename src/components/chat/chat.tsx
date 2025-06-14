@@ -62,13 +62,13 @@ export default function Chat({ initialMessages, id, isMobile }: ChatProps) {
     },
   });
   const [loadingSubmit, setLoadingSubmit] = React.useState(false);
-  const [lastInput, setLastInput] = useState<string>("");
   const formRef = useRef<HTMLFormElement>(null);
   const base64Images = useChatStore((state) => state.base64Images);
   const setBase64Images = useChatStore((state) => state.setBase64Images);
   const saveMessages = useChatStore((state) => state.saveMessages);
   const getMessagesById = useChatStore((state) => state.getMessagesById);
   const router = useRouter();
+  const userName = useChatStore((state) => state.userName);
 
   async function streamChatMessage({
     userInput,
@@ -85,7 +85,7 @@ export default function Chat({ initialMessages, id, isMobile }: ChatProps) {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ input: userInput }),
+        body: JSON.stringify({ input: userInput, user_name: userName }),
       });
 
       if (!response.body) throw new Error("No streaming body");
@@ -128,7 +128,6 @@ export default function Chat({ initialMessages, id, isMobile }: ChatProps) {
     setLoadingSubmit(true);
 
     const trimmedInput = input.trim();
-    setLastInput(trimmedInput); // Lưu giá trị vào state tạm thời
     setInput(""); // Reset input
 
     if (!trimmedInput) {
@@ -193,7 +192,7 @@ export default function Chat({ initialMessages, id, isMobile }: ChatProps) {
   };
 
   return (
-    <div className="flex flex-col w-full max-w-3xl h-full">
+    <div className="flex flex-col w-full max-w-7xl h-full">
       <ChatTopbar
         isLoading={isLoading}
         chatId={id}
@@ -210,7 +209,7 @@ export default function Chat({ initialMessages, id, isMobile }: ChatProps) {
             height={80}
             className="h-24 w-24 xl:h-28 xl:w-28 object-contain"
           />
-          <p className="text-center text-xl xl:text-2xl font-semibold text-muted-foreground">
+          <p className="text-center text-2xl xl:text-3xl font-semibold text-muted-foreground">
             Hôm nay bạn cần mình trợ giúp điều gì ?
           </p>
           <ChatBottombar

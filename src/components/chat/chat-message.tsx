@@ -82,7 +82,7 @@ function ChatMessage({ message, isLast, isLoading, reload }: ChatMessageProps) {
     thinkContent && message.role === "assistant" && (
       <details className="mb-2 text-sm" open>
         <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
-          Thinking process
+          Đang suy nghĩ...
         </summary>
         <div className="mt-2 text-muted-foreground">
           <Markdown remarkPlugins={[remarkGfm]}>{thinkContent}</Markdown>
@@ -104,25 +104,23 @@ function ChatMessage({ message, isLast, isLoading, reload }: ChatMessageProps) {
   );
 
   const renderActionButtons = () => (
-    message.role === "assistant" && (
+    message.role === "assistant" && !isLoading && (
       <div className="pt-2 flex gap-1 items-center text-muted-foreground">
-        {!isLoading && (
-          <ButtonWithTooltip side="bottom" toolTipText="Copy">
-            <Button
-              onClick={handleCopy}
-              variant="ghost"
-              size="icon"
-              className="h-4 w-4"
-            >
-              {isCopied ? (
-                <CheckIcon className="w-3.5 h-3.5 transition-all" />
-              ) : (
-                <CopyIcon className="w-3.5 h-3.5 transition-all" />
-              )}
-            </Button>
-          </ButtonWithTooltip>
-        )}
-        {!isLoading && isLast && (
+        <ButtonWithTooltip side="bottom" toolTipText="Copy">
+          <Button
+            onClick={handleCopy}
+            variant="ghost"
+            size="icon"
+            className="h-4 w-4"
+          >
+            {isCopied ? (
+              <CheckIcon className="w-3.5 h-3.5 transition-all" />
+            ) : (
+              <CopyIcon className="w-3.5 h-3.5 transition-all" />
+            )}
+          </Button>
+        </ButtonWithTooltip>
+        {isLast && (
           <ButtonWithTooltip side="bottom" toolTipText="Regenerate">
             <Button
               variant="ghost"

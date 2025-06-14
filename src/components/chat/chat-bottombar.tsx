@@ -63,7 +63,7 @@ export default function ChatBottombar({
         className="w-full flex items-center bg-accent dark:bg-card rounded-2xl shadow-md border border-border focus-within:ring-2 focus-within:ring-primary/40 transition-all duration-200 min-h-[72px]"
         style={{ overflow: "hidden", borderRadius: "1rem", paddingRight: 0 }}
       >
-        <div className="flex-1 flex">
+        <div className="flex-1 flex items-center">
           <ChatInput
             value={input}
             ref={inputRef}
@@ -71,7 +71,7 @@ export default function ChatBottombar({
             onChange={handleInputChange}
             name="message"
             placeholder="Ngày mới vui vẻ..."
-            className="w-full resize-none bg-transparent border-none px-6 py-6 text-lg focus:outline-none focus:ring-0 focus:shadow-none placeholder:text-muted-foreground rounded-none"
+            className="w-full resize-none bg-transparent border-none px-6 py-6 text-xl focus:outline-none focus:ring-0 focus:shadow-none placeholder:text-muted-foreground rounded-none"
             style={{
               boxShadow: "none",
               border: "none",
