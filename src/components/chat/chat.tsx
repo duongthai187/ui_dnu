@@ -17,6 +17,8 @@ import Auth from '../../Auth';
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 import firebaseApp from '../../firebase';
 
+
+
 export interface ChatProps {
   id: string;
   initialMessages: Message[] | [];
@@ -24,18 +26,9 @@ export interface ChatProps {
 }
 
 export default function Chat({ initialMessages, id, isMobile }: ChatProps) {
-  const [user, setUser] = React.useState<User | null>(null);
-  React.useEffect(() => {
-    const auth = getAuth(firebaseApp);
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  if (!user) {
-    return <Auth />;
-  }
+  // Đã vô hiệu hóa kiểm tra đăng nhập/đăng ký, luôn cho phép vào chat
+  type StreamCallback = (chunk: string) => void;
+  type FinishCallback = () => void;
 
   const {
     messages,
@@ -69,71 +62,122 @@ export default function Chat({ initialMessages, id, isMobile }: ChatProps) {
     },
   });
   const [loadingSubmit, setLoadingSubmit] = React.useState(false);
+  const [lastInput, setLastInput] = useState<string>("");
   const formRef = useRef<HTMLFormElement>(null);
   const base64Images = useChatStore((state) => state.base64Images);
   const setBase64Images = useChatStore((state) => state.setBase64Images);
-  const selectedModel = useChatStore((state) => state.selectedModel);
   const saveMessages = useChatStore((state) => state.saveMessages);
   const getMessagesById = useChatStore((state) => state.getMessagesById);
   const router = useRouter();
 
-  async function sendMessageToAPI(input: string, base64Images: string[] | null) {
-    const CUSTOM_API_URL = process.env.CUSTOM_API_URL || "https://your-backend-api.com";
-
+  async function streamChatMessage({
+    userInput,
+    onMessage,
+    onFinish,
+    onError,
+  }: {
+    userInput: string;
+    onMessage: StreamCallback;
+    onFinish: FinishCallback;
+    onError: (err: any) => void;
+  }) {
     try {
-      const response = await fetch(`${CUSTOM_API_URL}/api/chat`, {
+      const response = await fetch("/api/chat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: input,
-          images: base64Images || [],
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ input: userInput }),
       });
 
-      if (!response.ok) {
-        throw new Error("API error");
-      }
+      if (!response.body) throw new Error("No streaming body");
 
-      return await response.json();
-    } catch (error) {
-      console.error("Error in sendMessageToAPI:", error);
-      throw error;
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) {
+          onFinish();
+          break;
+        }
+        buffer += decoder.decode(value, { stream: true });
+
+        const lines = buffer.split("\n");
+        buffer = lines.pop()!; // giữ lại phần chưa hoàn chỉnh
+
+        for (const line of lines) {
+          if (!line.startsWith("data:")) continue;
+
+          try {
+            const json = JSON.parse(line.slice(6));
+            if (json.event === "message") {
+              onMessage(json.answer);
+            } else if (json.event === "message_end") {
+              onFinish();
+            }
+          } catch {}
+        }
+      }
+    } catch (err) {
+      onError(err);
     }
   }
 
-  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    window.history.replaceState({}, "", `/c/${id}`);
+    setLoadingSubmit(true);
+
+    const trimmedInput = input.trim();
+    setLastInput(trimmedInput); // Lưu giá trị vào state tạm thời
+    setInput(""); // Reset input
+
+    if (!trimmedInput) {
+      toast.error("Vui lòng nhập nội dung trước khi gửi!");
+      setLoadingSubmit(false);
+      return;
+    }
 
     const userMessage: Message = {
       id: generateId(),
       role: "user",
-      content: input,
+      content: trimmedInput,
     };
 
-    setLoadingSubmit(true);
+    setMessages([...messages, userMessage]);
 
-    try {
-      const data = await sendMessageToAPI(input, base64Images);
+    const assistantId = generateId();
+    let currentContent = "";
 
-      const aiMessage: Message = {
-        id: generateId(),
-        role: "assistant",
-        content: data.reply,
-      };
+    streamChatMessage({
+      userInput: trimmedInput, // Sử dụng giá trị đã lưu
+      onMessage: (chunk) => {
+        currentContent += chunk;
 
-      saveMessages(id, [...messages, userMessage, aiMessage]);
-      setMessages([...messages, userMessage, aiMessage]);
-    } catch (error) {
-      toast.error("API error: " + (error as Error).message);
-    } finally {
-      setLoadingSubmit(false);
-      setBase64Images(null);
-      setInput("");
-    }
+        const update_message: Message = {
+          id: assistantId,
+          role: "assistant",
+          content: currentContent,
+        };
+
+        const updatedMessages = [...messages, userMessage, update_message];
+        setMessages(updatedMessages);
+      },
+      onFinish: () => {
+        saveMessages(id, [...messages, userMessage, {
+          id: assistantId,
+          role: "assistant",
+          content: currentContent,
+        }]);
+        setLoadingSubmit(false);
+        setBase64Images(null);
+      },
+      onError: (err) => {
+        toast.error("Streaming error: " + err.message);
+        setLoadingSubmit(false);
+      }
+    });
   };
+
 
   const removeLatestMessage = () => {
     const updatedMessages = messages.slice(0, -1);

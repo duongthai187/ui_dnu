@@ -19,7 +19,6 @@ import { Button } from "../ui/button";
 import { CaretSortIcon, HamburgerMenuIcon } from "@radix-ui/react-icons";
 import { Sidebar } from "../sidebar";
 import { Message } from "ai/react";
-import { getSelectedModel } from "@/lib/model-helper";
 import useChatStore from "@/app/hooks/useChatStore";
 
 interface ChatTopbarProps {
@@ -35,33 +34,7 @@ export default function ChatTopbar({
   messages,
   setMessages,
 }: ChatTopbarProps) {
-  const [models, setModels] = React.useState<string[]>([]);
-  const [open, setOpen] = React.useState(false);
   const [sheetOpen, setSheetOpen] = React.useState(false);
-  const selectedModel = useChatStore((state) => state.selectedModel);
-  const setSelectedModel = useChatStore((state) => state.setSelectedModel);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await fetch("/api/tags");
-        if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
-
-        const data = await res.json().catch(() => null);
-        if (!data?.models?.length) return;
-
-        setModels(data.models.map(({ name }: { name: string }) => name));
-      } catch (error) {
-        console.error("Error fetching models:", error);
-      }
-    })();
-  }, []);
-
-
-  const handleModelChange = (model: string) => {
-    setSelectedModel(model);
-    setOpen(false);
-  };
 
   const handleCloseSidebar = () => {
     setSheetOpen(false);
