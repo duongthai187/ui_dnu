@@ -143,7 +143,7 @@ function ChatMessage({ message, isLast, isLoading, reload }: ChatMessageProps) {
           src={message.role === "assistant" ? "/Logo_DAI_NAM.png" : ""}
           width={6}
           height={6}
-          className="object-contain dark:invert"
+          className="object-contain"
           fallback={message.role === "user" ? "US" : ""}
         />
         <ChatBubbleMessage>
