@@ -210,7 +210,7 @@ export default function Chat({ initialMessages, id, isMobile }: ChatProps) {
             className="h-24 w-24 xl:h-28 xl:w-28 object-contain"
           />
           <p className="text-center text-2xl xl:text-3xl font-semibold text-muted-foreground">
-            Hôm nay bạn cần mình trợ giúp điều gì ?
+            Hãy hỏi Viện Công nghệ Tài chính bất cứ điều gì bạn muốn.
           </p>
           <ChatBottombar
             input={input}

@@ -38,7 +38,7 @@ export default function Home() {
         />
         <DialogContent className="flex flex-col space-y-4">
           <DialogHeader className="space-y-2">
-            <DialogTitle>Trường Đại học Đại Nam xin chào bạn</DialogTitle>
+            <DialogTitle>Viện Công nghệ Tài chính xin chào bạn</DialogTitle>
             <DialogDescription>
               Cho mình biết nên gọi bạn là gì nhé. Bạn có thể thay đổi tên này bất cứ lúc nào.
             </DialogDescription>
