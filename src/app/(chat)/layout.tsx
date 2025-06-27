@@ -8,7 +8,7 @@ import { ModeToggle } from "@/components/mode-toggle";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Trợ lý AI - Viện Công nghệ Tài chính - Trường Đại học Đại Nam",
+  title: "FTA AI - Viện Công nghệ Tài chính",
   description: "Hãy hỏi Viện Công nghệ Tài chính bất cứ điều gì bạn muốn ^^"
 };
 
