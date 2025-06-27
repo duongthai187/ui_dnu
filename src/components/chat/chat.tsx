@@ -205,9 +205,9 @@ export default function Chat({ initialMessages, id, isMobile }: ChatProps) {
           <Image
             src="/Logo_DAI_NAM.png"
             alt="AI"
-            width={80}
-            height={80}
-            className="h-24 w-24 xl:h-28 xl:w-28 object-contain"
+            width={240}
+            height={240}
+            className="h-48 w-48 xl:h-96 xl:w-96 object-contain"
           />
           <p className="text-center text-2xl xl:text-3xl font-semibold text-muted-foreground">
             Hãy hỏi Viện Công nghệ Tài chính bất cứ điều gì bạn muốn.
