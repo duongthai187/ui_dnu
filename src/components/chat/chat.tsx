@@ -17,6 +17,17 @@ import Auth from '../../Auth';
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 import firebaseApp from '../../firebase';
 
+function saveConversationId(conversationName: string, conversationId: string) {
+  const conversations = JSON.parse(localStorage.getItem("conversations") || "{}");
+  conversations[conversationName] = conversationId;
+  localStorage.setItem("conversations", JSON.stringify(conversations));
+}
+
+
+function getConversationId(conversationName: string): string | null {
+  const conversations = JSON.parse(localStorage.getItem("conversations") || "{}");
+  return conversations[conversationName] || null;
+}
 
 
 export interface ChatProps {
@@ -72,20 +83,28 @@ export default function Chat({ initialMessages, id, isMobile }: ChatProps) {
 
   async function streamChatMessage({
     userInput,
+    conversationName,
     onMessage,
     onFinish,
     onError,
   }: {
     userInput: string;
+    conversationName: string;
     onMessage: StreamCallback;
     onFinish: FinishCallback;
     onError: (err: any) => void;
   }) {
     try {
+      const conversationId = getConversationId(conversationName); // Lấy conversation_id từ localStorage
+
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ input: userInput, user_name: userName }),
+        body: JSON.stringify({
+          input: userInput,
+          user_name: userName,
+          conversation_id: conversationId || null, // Gửi conversation_id nếu có
+        }),
       });
 
       if (!response.body) throw new Error("No streaming body");
@@ -110,6 +129,9 @@ export default function Chat({ initialMessages, id, isMobile }: ChatProps) {
 
           try {
             const json = JSON.parse(line.slice(6));
+            if (json.conversation_id) {
+              saveConversationId(conversationName, json.conversation_id); // Lưu conversation_id mới
+            }
             if (json.event === "message") {
               onMessage(json.answer);
             } else if (json.event === "message_end") {
@@ -125,6 +147,12 @@ export default function Chat({ initialMessages, id, isMobile }: ChatProps) {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (loadingSubmit) {
+      toast.error("Vui lòng chờ chatbot trả lời trước khi gửi tin nhắn mới!");
+      return;
+    }
+
     setLoadingSubmit(true);
 
     const trimmedInput = input.trim();
@@ -148,7 +176,8 @@ export default function Chat({ initialMessages, id, isMobile }: ChatProps) {
     let currentContent = "";
 
     streamChatMessage({
-      userInput: trimmedInput, // Sử dụng giá trị đã lưu
+      userInput: trimmedInput,
+      conversationName: id, // Sử dụng id làm tên cuộc trò chuyện
       onMessage: (chunk) => {
         currentContent += chunk;
 
@@ -173,7 +202,7 @@ export default function Chat({ initialMessages, id, isMobile }: ChatProps) {
       onError: (err) => {
         toast.error("Streaming error: " + err.message);
         setLoadingSubmit(false);
-      }
+      },
     });
   };
 

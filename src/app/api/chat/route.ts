@@ -37,11 +37,10 @@
 // }
 
 
-// app/api/stream-chat/route.ts
 export const dynamic = "force-dynamic"; // không cache, keep streaming
 
 export async function POST(req: Request) {
-  const { input, user_name } = await req.json();
+  const { input, user_name, conversation_id } = await req.json(); // Nhận conversation_id từ client
   const apiKey = process.env.API_DIFY_KEY!;
   const res = await fetch(`${process.env.BASE_URL}/chat-messages`, {
     method: "POST",
@@ -54,7 +53,7 @@ export async function POST(req: Request) {
       inputs: { user_name: user_name ? user_name : "Khách" },
       response_mode: "streaming",
       user: "anonymous",
-      conversation_id: "",
+      conversation_id: conversation_id || "", // Gửi conversation_id từ client nếu có
     }),
   });
 
@@ -64,9 +63,23 @@ export async function POST(req: Request) {
   return new Response(
     new ReadableStream({
       async start(controller) {
+        let sentConversationId = false; // Đảm bảo chỉ gửi conversation_id một lần
+
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
+
+          // Trích xuất conversation_id từ phản hồi đầu tiên
+          const text = new TextDecoder().decode(value);
+          const match = text.match(/"conversation_id":\s*"([^"]+)"/);
+          if (match && !sentConversationId) {
+            const newConversationId = match[1];
+            controller.enqueue(
+              encoder.encode(`data: {"conversation_id": "${newConversationId}"}\n\n`)
+            ); // Gửi conversation_id mới về client
+            sentConversationId = true; // Đánh dấu đã gửi
+          }
+
           controller.enqueue(value);
         }
         controller.close();
